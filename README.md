@@ -39,31 +39,19 @@ The program uses 64-bit general-purpose registers to pass arguments into system 
 ## 🚀 How to Run the Project
 
 ### Prerequisites
-You need a Linux environment with the Netwide Assembler (**NASM**) and the GNU Linker (**ld**) installed.
-
+You need a Linux environment with the Netwide Assembler (**NASM**) and the GNU Linker (**ld**) installed:
 ```bash
-sudo apt update
-sudo apt install nasm binutils
+sudo apt update && sudo apt install nasm binutils -y
 ```
 
-### Building the Project
-We have provided an automated `build.sh` script to compile the assembly file into machine code and link it into an executable.
-
-1. Clone or download this repository.
-2. Open your terminal in the directory.
-3. Make the build script executable (only needed once):
-   ```bash
-   chmod +x build.sh
-   ```
-4. Run the build script:
-   ```bash
-   ./build.sh
-   ```
-
-### Executing
-After a successful build, a `traffic` executable binary will be generated. Run it by typing:
+### Build & Run
+To download, compile, and run the project, just copy and paste this entire block into your terminal:
 
 ```bash
+git clone https://github.com/AA-Rexford/Traffic-Light-Control.git
+cd Traffic-Light-Control
+chmod +x build.sh
+./build.sh
 ./traffic
 ```
 
