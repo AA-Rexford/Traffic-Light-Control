@@ -4,32 +4,38 @@ This project is a 64-bit Linux Assembly program simulating a real-world **Traffi
 
 ## 🚦 Project Overview
 
-The program initializes in a `RED` light state, and sequentially transitions through `GREEN` and `YELLOW` states, eventually looping back to `RED`. 
+The program executes a traffic light cycle: **RED -> YELLOW -> GREEN**. 
 
-This is a **fully automated** simulation. It uses the kernel's `sys_nanosleep` system call to accurately time the light transitions. It also utilizes **ANSI terminal escape codes** to clear the screen before every transition and print the traffic lights in their actual colors (Red, Green, Yellow), creating a beautiful, real-time presentation piece.
+To make the presentation stunning, we use **UTF-8 Emojis** (🔴 🟡 🟢) to render large, perfectly circular lights directly in the terminal! We also use 256-color ANSI codes to ensure the Yellow is incredibly bright and doesn't look brown.
+
+After completing a cycle, it pauses and waits for the user to press **ENTER** before running another cycle, ensuring the presenter has 100% control over the pace.
 
 ## 🛠️ Concepts & Technologies Used
 
 This project utilizes raw low-level instructions to communicate directly with the Linux Kernel.
 
 ### 1. File Sections
-* **`.data`**: Allocates memory for static variables (e.g., our colored strings). We use the `equ` directive to dynamically calculate string lengths at compile time. We also define our `timespec` struct here for the sleep timer.
+* **`.data`**: Allocates memory for static variables (e.g., our printable strings like `"RED light is ON"`). We use the `equ` directive to dynamically calculate string lengths at compile time.
+* **`.bss`**: Reserves memory (buffers) for variables that will be modified at runtime. We use this to hold the user's keyboard input.
 * **`.text`**: The main execution block containing our operational opcodes. Begins at `global _start`.
 
 ### 2. 64-bit Registers
 The program uses 64-bit general-purpose registers to pass arguments into system calls:
 * **`rax`** - Accumulator: Used to pass the specific System Call ID.
-* **`rdi`** - Destination Index: Used to pass the File Descriptor (0 for stdin, 1 for stdout) or struct pointers.
-* **`rsi`** - Source Index: Used as a pointer to the memory location of our strings.
+* **`rdi`** - Destination Index: Used to pass the File Descriptor (0 for stdin, 1 for stdout).
+* **`rsi`** - Source Index: Used as a pointer to the memory location (buffer) of our strings.
 * **`rdx`** - Data Register: Used to specify the length/size of the data we are reading or writing.
 
 ### 3. Linux System Calls (`syscall`)
-* **`sys_write` (ID 1):** Commands the kernel to print our predefined string buffers (and color codes) out to the console terminal.
-* **`sys_nanosleep` (ID 35):** Commands the kernel to pause execution for a highly precise duration based on our `timespec` struct.
+* **`sys_write` (ID 1):** Commands the kernel to print our predefined string buffers out to the console terminal.
+* **`sys_read` (ID 0):** Commands the kernel to pause execution and read keystrokes from the terminal. 
+* **`sys_nanosleep` (ID 35):** Commands the kernel to sleep for a precise duration between state transitions.
+* **`sys_exit` (ID 60):** Tells the kernel to terminate the program cleanly with exit code 0.
 
 ### 4. Control Flow & Subroutines
-* **`call` and `ret`**: We created modular subroutines (`do_clear` and `do_delay`) to handle the redundant tasks of clearing the terminal and triggering the sleep timer. We `call` these between every state, and `ret` brings us back to the next step.
-* **`jmp`**: Unconditional Jump. Used at the end of the `YELLOW` state to force the code pointer back to the `RED` state, creating our infinite automated sequence.
+* **`call` and `ret`**: We created a modular subroutine (`do_delay`) to handle the redundant task of triggering the sleep timer. We `call` this between every state, and `ret` brings us back to the next step.
+* **`cmp` and `je`**: Comparisons (Conditional Jumps). We check if the user inputted 'q'. If `je` (Jump if Equal) is true, we skip the loop and gracefully end the script. 
+* **`jmp`**: Unconditional Jump. Used to loop back to the `RED` state when the user presses ENTER.
 
 ---
 
@@ -53,5 +59,5 @@ chmod +x build.sh
 ```
 
 ### Usage
-- The traffic light will automatically run and cycle through its states with built-in timers.
-- To exit the simulation, press `Ctrl+C` in your terminal.
+- Press **ENTER** repeatedly to trigger a new traffic light cycle.
+- Type **q** and hit **ENTER** to safely terminate the program.

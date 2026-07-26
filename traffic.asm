@@ -1,18 +1,22 @@
 section .data
     ; --- Bright Colored Light Messages ---
-    ; We use ANSI escape codes [1;31m, [1;33m, [1;32m to make the colors EXTREMELY BRIGHT and BOLD
+    ; We use ANSI escape codes [1;31m, [38;5;226m, [1;32m to make the colors EXTREMELY BRIGHT
+    ; We use raw UTF-8 bytes to render massive Circular Emoji traffic lights!
+    ; 0xF0, 0x9F, 0x94, 0xB4 = 🔴 (Red Circle)
+    ; 0xF0, 0x9F, 0x9F, 0xA1 = 🟡 (Yellow Circle)
+    ; 0xF0, 0x9F, 0x9F, 0xA2 = 🟢 (Green Circle)
     
-    red_msg db 0x1B, '[1;31m', '[ RED ]    STOP!', 0x1B, '[0m', 0xA
+    red_msg db 0x1B, '[1;31m', '[ ', 0xF0, 0x9F, 0x94, 0xB4, ' RED    ] STOP!', 0x1B, '[0m', 0xA
     red_len equ $ - red_msg
 
-    yellow_msg db 0x1B, '[1;33m', '[ YELLOW ] CAUTION!', 0x1B, '[0m', 0xA
+    yellow_msg db 0x1B, '[38;5;226m', '[ ', 0xF0, 0x9F, 0x9F, 0xA1, ' YELLOW ] CAUTION!', 0x1B, '[0m', 0xA
     yellow_len equ $ - yellow_msg
 
-    green_msg db 0x1B, '[1;32m', '[ GREEN ]  GO!', 0x1B, '[0m', 0xA
+    green_msg db 0x1B, '[1;32m', '[ ', 0xF0, 0x9F, 0x9F, 0xA2, ' GREEN  ] GO!', 0x1B, '[0m', 0xA
     green_len equ $ - green_msg
 
     ; Prompt message
-    prompt_msg db 0xA, 'Press ENTER to repeat cycle (or q to quit): '
+    prompt_msg db 0xA, 'Press ENTER to trigger cycle (or q to quit): '
     prompt_len equ $ - prompt_msg
 
     ; Newline
@@ -41,8 +45,8 @@ cycle_start:
     mov rdx, red_len
     syscall
 
-    ; Wait 2 seconds
-    mov qword [tv_sec], 2
+    ; Wait 1.5 seconds (we'll just do 1 for simplicity in assembly)
+    mov qword [tv_sec], 1
     call do_delay
 
     ; --- STATE 2: YELLOW ---
@@ -63,8 +67,8 @@ cycle_start:
     mov rdx, green_len
     syscall
 
-    ; Wait 2 seconds before showing prompt
-    mov qword [tv_sec], 2
+    ; Wait 1 second before showing prompt
+    mov qword [tv_sec], 1
     call do_delay
 
     ; --- PROMPT FOR NEXT CYCLE ---
