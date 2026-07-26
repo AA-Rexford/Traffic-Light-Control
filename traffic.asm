@@ -6,9 +6,9 @@ section .data
     red_msg db 0x1B, '[1;31m'
             db '      .---------.      ', 0xA
             db '    ."           ".    ', 0xA
-            db '   /     RED     \   ', 0xA
-            db '  |     STOP!     |  ', 0xA
-            db '   \             /   ', 0xA
+            db '   /      RED      \   ', 0xA
+            db '  |      STOP!      |  ', 0xA
+            db '   \               /   ', 0xA
             db '    ".           ."    ', 0xA
             db '      `---------`      ', 0xA
             db 0x1B, '[0m', 0xA
@@ -17,9 +17,9 @@ section .data
     yellow_msg db 0x1B, '[38;5;226m'
                db '      .---------.      ', 0xA
                db '    ."           ".    ', 0xA
-               db '   /    YELLOW   \   ', 0xA
-               db '  |   GET READY   |  ', 0xA
-               db '   \             /   ', 0xA
+               db '   /    YELLOW     \   ', 0xA
+               db '  |    GET READY    |  ', 0xA
+               db '   \               /   ', 0xA
                db '    ".           ."    ', 0xA
                db '      `---------`      ', 0xA
                db 0x1B, '[0m', 0xA
@@ -28,9 +28,9 @@ section .data
     green_msg db 0x1B, '[1;32m'
               db '      .---------.      ', 0xA
               db '    ."           ".    ', 0xA
-              db '   /    GREEN    \   ', 0xA
-              db '  |      GO!      |  ', 0xA
-              db '   \             /   ', 0xA
+              db '   /     GREEN     \   ', 0xA
+              db '  |       GO!       |  ', 0xA
+              db '   \               /   ', 0xA
               db '    ".           ."    ', 0xA
               db '      `---------`      ', 0xA
               db 0x1B, '[0m', 0xA

@@ -48,11 +48,17 @@ sudo apt update && sudo apt install nasm binutils -y
 ```
 
 ### Build & Run
-To download, compile, and run the project, just copy and paste this entire block into your terminal:
 
+**Step 1: Download the Project** (Skip if you already have it)
+If you are downloading this for the first time, run:
 ```bash
 git clone https://github.com/AA-Rexford/Traffic-Light-Control.git
 cd Traffic-Light-Control
+```
+
+**Step 2: Compile & Run**
+To compile the assembly code and start the simulation, run:
+```bash
 chmod +x build.sh
 ./build.sh
 ./traffic
