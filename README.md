@@ -43,11 +43,13 @@ The program uses 64-bit general-purpose registers to pass arguments into system 
 
 To push the boundaries of standard Assembly projects, this program includes advanced real-world features:
 
-1. **In-Place Hologram Animation (ANSI Cursor Control)**
-   Instead of constantly scrolling the terminal down, we inject raw ANSI escape codes (`\033[8A`) directly to the Linux kernel to move the cursor UP 8 lines before printing the next state. The traffic light **stays locked in one spot** and morphs colors *in-place* like a modern UI dashboard!
-2. **Accessibility Beep (Visually Impaired Mode)**
+1. **Realistic 3D Double-Frame Housing & Pole**
+   The UI now draws an entire real-world traffic light box, including a double-layered, rounded housing frame and a physical stand at the bottom! All 3 lights are constantly visible inside this 3D frame, stacked vertically. The active light is painted in bright, vibrant colors, while the inactive lights are rendered as empty, dark-gray outlines to perfectly simulate a physical traffic light with its bulbs turned off.
+2. **In-Place Hologram Animation (ANSI Cursor Control)**
+   Instead of endlessly scrolling down the terminal, the traffic light tower **stays locked in a single spot**. When a light changes, the Assembly code sends a raw ANSI escape sequence (`\033[35A`) to the Linux kernel to move the terminal cursor UP 35 lines. It then perfectly overwrites the previous tower in-place.
+3. **Accessibility Beep (Visually Impaired Mode)**
    Real pedestrian traffic lights emit an audible sound when it is safe to cross. We implemented this by injecting the raw ASCII Bell byte (`0x07`) into the Pedestrian Mode sequence, causing the computer to physically beep to assist visually impaired pedestrians.
-3. **Interactive State Machine (Night Mode & Pedestrians)**
+4. **Interactive State Machine (Night Mode & Pedestrians)**
    The interactive prompt acts as a complex state machine router:
    - **Night Mode (`n`)**: Triggers an isolated loop that rapidly flashes a Yellow circle and a dark gray Blank circle, simulating an intersection at 2:00 AM.
    - **Pedestrian Mode (`p`)**: Simulates a pedestrian hitting the crosswalk button. It cuts the Green light short, transitions to Yellow, and then holds on Red while continuously beeping.
