@@ -7,8 +7,29 @@ YEL = "38;5;226"
 GRN = "1;32"
 RST = "0"
 
+def draw_top():
+    s = f"                  db 0x1B, '[{WHT}m', ' .===============================. ', 0xA\n"
+    s += f"                  db 0x1B, '[{WHT}m', ' || .-------------------------. || ', 0xA\n"
+    return s
+
+def draw_bot():
+    s = f"                  db 0x1B, '[{WHT}m', ' || `-------------------------` || ', 0xA\n"
+    s += f"                  db 0x1B, '[{WHT}m', ' `===============================` ', 0xA\n"
+    s += f"                  db 0x1B, '[{WHT}m', '            ||       ||            ', 0xA\n"
+    s += f"                  db 0x1B, '[{WHT}m', '            ||       ||            ', 0xA\n"
+    s += f"                  db 0x1B, '[{WHT}m', '            ||       ||            ', 0xA\n"
+    s += f"                  db 0x1B, '[{WHT}m', '            ||       ||            ', 0xA\n"
+    s += f"                  db 0x1B, '[{WHT}m', '            ||       ||            ', 0xA\n"
+    s += f"                  db 0x1B, '[{WHT}m', '            ||       ||            ', 0xA\n"
+    s += f"                  db 0x1B, '[{WHT}m', '           _||_______||_           ', 0xA\n"
+    s += f"                  db 0x1B, '[{WHT}m', '          [_____________]          ', 0xA\n"
+    return s
+
 def colored_line(border_color, inner_color, text):
-    return f"                  db 0x1B, '[{border_color}m', '| ', 0x1B, '[{inner_color}m', '{text}', 0x1B, '[{border_color}m', ' |', 0xA\n"
+    return f"                  db 0x1B, '[{border_color}m', ' || | ', 0x1B, '[{inner_color}m', '{text}', 0x1B, '[{border_color}m', ' | || ', 0xA\n"
+
+def empty_padding():
+    return f"                  db 0x1B, '[{WHT}m', ' || |                         | || ', 0xA\n"
 
 red_c = [
     '      .---------.      ',
@@ -49,24 +70,26 @@ off_c = [
 
 def make_frame(name, top_c, mid_c, bot_c, top_color, mid_color, bot_color):
     s = f"    {name}_msg:\n"
-    s += f"                  db 0x1B, '[{WHT}m', '+-------------------------+', 0xA\n"
+    s += draw_top()
     for line in top_c: s += colored_line(WHT, top_color, line)
+    s += empty_padding()
     for line in mid_c: s += colored_line(WHT, mid_color, line)
+    s += empty_padding()
     for line in bot_c: s += colored_line(WHT, bot_color, line)
-    s += f"                  db 0x1B, '[{WHT}m', '+-------------------------+', 0xA\n"
+    s += draw_bot()
     s += f"                  db 0x1B, '[0m'\n"
     s += f"    {name}_len equ $ - {name}_msg\n\n"
     return s
 
 asm = f"""section .data
-    ; --- 3-Light Tower Frames with Vibrant White Border ---
+    ; --- 3D Decorative Traffic Light Tower ---
 {make_frame('red_frame', red_c, off_c, off_c, RED, GRY, GRY)}
 {make_frame('yellow_frame', off_c, yel_c, off_c, GRY, YEL, GRY)}
 {make_frame('green_frame', off_c, off_c, grn_c, GRY, GRY, GRN)}
 {make_frame('all_off_frame', off_c, off_c, off_c, GRY, GRY, GRY)}
 
-    ; Cursor Control (Move up exactly 23 lines)
-    move_up db 0x1B, '[23A', 0x0D
+    ; Cursor Control (Move up exactly 35 lines)
+    move_up db 0x1B, '[35A', 0x0D
     move_up_len equ $ - move_up
 
     ; Sound Control
