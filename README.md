@@ -6,7 +6,7 @@ This project is a 64-bit Linux Assembly program simulating a real-world **Traffi
 
 The program executes a traffic light cycle: **RED -> YELLOW -> GREEN**. 
 
-To make the presentation stunning, we use **UTF-8 Emojis** (🔴 🟡 🟢) to render large, perfectly circular lights directly in the terminal! We also use 256-color ANSI codes to ensure the Yellow is incredibly bright and doesn't look brown.
+To make the presentation stunning, we designed **Massive ASCII Art Circles** using standard characters (`-`, `.`, `\`, `/`) to render huge, perfectly circular lights directly in the terminal! We also use 256-color ANSI codes to ensure the Yellow is incredibly bright and doesn't look brown. The yellow light also uses the Ghanaian style "GET READY!" prompt.
 
 After completing a cycle, it pauses and waits for the user to press **ENTER** before running another cycle, ensuring the presenter has 100% control over the pace.
 

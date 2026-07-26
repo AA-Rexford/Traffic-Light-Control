@@ -1,18 +1,39 @@
 section .data
-    ; --- Bright Colored Light Messages ---
-    ; We use ANSI escape codes [1;31m, [38;5;226m, [1;32m to make the colors EXTREMELY BRIGHT
-    ; We use raw UTF-8 bytes to render massive Circular Emoji traffic lights!
-    ; 0xF0, 0x9F, 0x94, 0xB4 = 🔴 (Red Circle)
-    ; 0xF0, 0x9F, 0x9F, 0xA1 = 🟡 (Yellow Circle)
-    ; 0xF0, 0x9F, 0x9F, 0xA2 = 🟢 (Green Circle)
+    ; --- Huge ASCII Art Circular Light Messages ---
+    ; Using ANSI escape codes [1;31m, [38;5;226m, [1;32m for EXTREMELY BRIGHT colors
+    ; We manually draw large circles using ASCII hyphens, commas, and dots as requested.
     
-    red_msg db 0x1B, '[1;31m', '[ ', 0xF0, 0x9F, 0x94, 0xB4, ' RED    ] STOP!', 0x1B, '[0m', 0xA
+    red_msg db 0x1B, '[1;31m'
+            db '      .---------.      ', 0xA
+            db '    ."           ".    ', 0xA
+            db '   /     RED       \   ', 0xA
+            db '  |     STOP!       |  ', 0xA
+            db '   \               /   ', 0xA
+            db '    ".           ."    ', 0xA
+            db '      `---------`      ', 0xA
+            db 0x1B, '[0m', 0xA
     red_len equ $ - red_msg
 
-    yellow_msg db 0x1B, '[38;5;226m', '[ ', 0xF0, 0x9F, 0x9F, 0xA1, ' YELLOW ] CAUTION!', 0x1B, '[0m', 0xA
+    yellow_msg db 0x1B, '[38;5;226m'
+               db '      .---------.      ', 0xA
+               db '    ."           ".    ', 0xA
+               db '   /    YELLOW     \   ', 0xA
+               db '  |   GET READY!    |  ', 0xA
+               db '   \               /   ', 0xA
+               db '    ".           ."    ', 0xA
+               db '      `---------`      ', 0xA
+               db 0x1B, '[0m', 0xA
     yellow_len equ $ - yellow_msg
 
-    green_msg db 0x1B, '[1;32m', '[ ', 0xF0, 0x9F, 0x9F, 0xA2, ' GREEN  ] GO!', 0x1B, '[0m', 0xA
+    green_msg db 0x1B, '[1;32m'
+              db '      .---------.      ', 0xA
+              db '    ."           ".    ', 0xA
+              db '   /    GREEN      \   ', 0xA
+              db '  |       GO!       |  ', 0xA
+              db '   \               /   ', 0xA
+              db '    ".           ."    ', 0xA
+              db '      `---------`      ', 0xA
+              db 0x1B, '[0m', 0xA
     green_len equ $ - green_msg
 
     ; Prompt message
@@ -45,7 +66,7 @@ cycle_start:
     mov rdx, red_len
     syscall
 
-    ; Wait 1.5 seconds (we'll just do 1 for simplicity in assembly)
+    ; Wait 1.5 seconds (using 1 sec for simplicity in assembly loop)
     mov qword [tv_sec], 1
     call do_delay
 
@@ -89,7 +110,7 @@ cycle_start:
     cmp byte [input], 'q'
     je exit
 
-    ; Print a blank line before the next cycle starts for readability
+    ; Print a blank line before the next cycle starts
     mov rax, 1
     mov rdi, 1
     mov rsi, newline
