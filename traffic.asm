@@ -1,14 +1,14 @@
 section .data
     ; --- Huge ASCII Art Circular Light Messages ---
     ; Using ANSI escape codes [1;31m, [38;5;226m, [1;32m for EXTREMELY BRIGHT colors
-    ; We manually draw large circles using ASCII hyphens, commas, and dots as requested.
+    ; The text inside the circles is now perfectly center-aligned!
     
     red_msg db 0x1B, '[1;31m'
             db '      .---------.      ', 0xA
             db '    ."           ".    ', 0xA
-            db '   /     RED       \   ', 0xA
-            db '  |     STOP!       |  ', 0xA
-            db '   \               /   ', 0xA
+            db '   /     RED     \   ', 0xA
+            db '  |     STOP!     |  ', 0xA
+            db '   \             /   ', 0xA
             db '    ".           ."    ', 0xA
             db '      `---------`      ', 0xA
             db 0x1B, '[0m', 0xA
@@ -17,9 +17,9 @@ section .data
     yellow_msg db 0x1B, '[38;5;226m'
                db '      .---------.      ', 0xA
                db '    ."           ".    ', 0xA
-               db '   /    YELLOW     \   ', 0xA
-               db '  |   GET READY!    |  ', 0xA
-               db '   \               /   ', 0xA
+               db '   /    YELLOW   \   ', 0xA
+               db '  |   GET READY   |  ', 0xA
+               db '   \             /   ', 0xA
                db '    ".           ."    ', 0xA
                db '      `---------`      ', 0xA
                db 0x1B, '[0m', 0xA
@@ -28,9 +28,9 @@ section .data
     green_msg db 0x1B, '[1;32m'
               db '      .---------.      ', 0xA
               db '    ."           ".    ', 0xA
-              db '   /    GREEN      \   ', 0xA
-              db '  |       GO!       |  ', 0xA
-              db '   \               /   ', 0xA
+              db '   /    GREEN    \   ', 0xA
+              db '  |      GO!      |  ', 0xA
+              db '   \             /   ', 0xA
               db '    ".           ."    ', 0xA
               db '      `---------`      ', 0xA
               db 0x1B, '[0m', 0xA
@@ -66,8 +66,9 @@ cycle_start:
     mov rdx, red_len
     syscall
 
-    ; Wait 1.5 seconds (using 1 sec for simplicity in assembly loop)
-    mov qword [tv_sec], 1
+    ; Wait 2.2 seconds (2 seconds + 200,000,000 nanoseconds)
+    mov qword [tv_sec], 2
+    mov qword [tv_nsec], 200000000
     call do_delay
 
     ; --- STATE 2: YELLOW ---
@@ -77,8 +78,9 @@ cycle_start:
     mov rdx, yellow_len
     syscall
 
-    ; Wait 1 second
-    mov qword [tv_sec], 1
+    ; Wait 2.2 seconds (2 seconds + 200,000,000 nanoseconds)
+    mov qword [tv_sec], 2
+    mov qword [tv_nsec], 200000000
     call do_delay
 
     ; --- STATE 3: GREEN ---
@@ -88,8 +90,9 @@ cycle_start:
     mov rdx, green_len
     syscall
 
-    ; Wait 1 second before showing prompt
-    mov qword [tv_sec], 1
+    ; Wait 3.0 seconds (3 seconds + 0 nanoseconds)
+    mov qword [tv_sec], 3
+    mov qword [tv_nsec], 0
     call do_delay
 
     ; --- PROMPT FOR NEXT CYCLE ---
