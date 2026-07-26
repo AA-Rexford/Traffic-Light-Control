@@ -33,9 +33,24 @@ The program uses 64-bit general-purpose registers to pass arguments into system 
 * **`sys_exit` (ID 60):** Tells the kernel to terminate the program cleanly with exit code 0.
 
 ### 4. Control Flow & Subroutines
-* **`call` and `ret`**: We created a modular subroutine (`do_delay`) to handle the redundant task of triggering the sleep timer. We `call` this between every state, and `ret` brings us back to the next step.
-* **`cmp` and `je`**: Comparisons (Conditional Jumps). We check if the user inputted 'q'. If `je` (Jump if Equal) is true, we skip the loop and gracefully end the script. 
-* **`jmp`**: Unconditional Jump. Used to loop back to the `RED` state when the user presses ENTER.
+* **`call` and `ret`**: We created modular subroutines (`do_delay` and `do_move_up`) to handle redundant tasks like triggering the sleep timer and manipulating the terminal cursor.
+* **`cmp` and `je`**: Comparisons (Conditional Jumps). We check if the user inputted 'q', 'n', or 'p'. The `je` (Jump if Equal) dynamically routes the program to different state machines (Quit, Night Mode, Pedestrian Mode).
+* **`jmp`**: Unconditional Jump. Used to loop back to the `prompt_loop`.
+
+---
+
+## 🌟 Innovation & Creativity Features
+
+To push the boundaries of standard Assembly projects, this program includes advanced real-world features:
+
+1. **In-Place Hologram Animation (ANSI Cursor Control)**
+   Instead of constantly scrolling the terminal down, we inject raw ANSI escape codes (`\033[8A`) directly to the Linux kernel to move the cursor UP 8 lines before printing the next state. The traffic light **stays locked in one spot** and morphs colors *in-place* like a modern UI dashboard!
+2. **Accessibility Beep (Visually Impaired Mode)**
+   Real pedestrian traffic lights emit an audible sound when it is safe to cross. We implemented this by injecting the raw ASCII Bell byte (`0x07`) into the Pedestrian Mode sequence, causing the computer to physically beep to assist visually impaired pedestrians.
+3. **Interactive State Machine (Night Mode & Pedestrians)**
+   The interactive prompt acts as a complex state machine router:
+   - **Night Mode (`n`)**: Triggers an isolated loop that rapidly flashes a Yellow circle and a dark gray Blank circle, simulating an intersection at 2:00 AM.
+   - **Pedestrian Mode (`p`)**: Simulates a pedestrian hitting the crosswalk button. It cuts the Green light short, transitions to Yellow, and then holds on Red while continuously beeping.
 
 ---
 
@@ -49,18 +64,20 @@ sudo apt update && sudo apt install nasm binutils -y
 
 ### Build & Run
 
-**Step 1: Download the Project** (Skip if you already have it)
-If you are downloading this for the first time, run:
-```bash
-git clone https://github.com/AA-Rexford/Traffic-Light-Control.git
-cd Traffic-Light-Control
-```
+To download the code, compile the assembly, and start the simulation, simply copy and paste this entire block into your terminal:
 
-**Step 2: Compile & Run**
-To compile the assembly code and start the simulation, run:
 ```bash
+# 1. Download the project
+git clone https://github.com/AA-Rexford/Traffic-Light-Control.git
+
+# 2. Enter the directory
+cd Traffic-Light-Control
+
+# 3. Make the script executable and compile
 chmod +x build.sh
 ./build.sh
+
+# 4. Run the masterpiece!
 ./traffic
 ```
 
