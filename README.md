@@ -15,7 +15,7 @@ After completing a cycle, it pauses and waits for the user to press **ENTER** be
 This project utilizes raw low-level instructions to communicate directly with the Linux Kernel.
 
 ### 1. File Sections
-* **`.data`**: Allocates memory for static variables (e.g., our printable strings like `"RED light is ON"`). We use the `equ` directive to dynamically calculate string lengths at compile time.
+* **`.data`**: Allocates memory for static variables (e.g., our massive ASCII art string variables like `red_msg`). We use the `equ` directive to dynamically calculate string lengths at compile time. We also define our `timespec` struct here for the sleep timers.
 * **`.bss`**: Reserves memory (buffers) for variables that will be modified at runtime. We use this to hold the user's keyboard input.
 * **`.text`**: The main execution block containing our operational opcodes. Begins at `global _start`.
 
