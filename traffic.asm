@@ -1,4 +1,9 @@
 section .data
+    ; =============================================================
+    ; [DATA SEGMENT]
+    ; The .data section is used for declaring initialized data or constants.
+    ; This data does not change at runtime. (e.g. DB for bytes, EQU for constants)
+    ; =============================================================
     ; --- 3D Decorative Traffic Light Tower ---
     red_frame_msg:
                   db 0x1B, '[1;37m', ' .===============================. ', 0xA
@@ -37,6 +42,8 @@ section .data
                   db 0x1B, '[1;37m', '           _||_______||_           ', 0xA
                   db 0x1B, '[1;37m', '          [_____________]          ', 0xA
                   db 0x1B, '[0m'
+    ; 'equ' defines an Assembly Constant (like a #define in C)
+    ; '$' refers to the current memory address. By subtracting the start address, we calculate the exact length of the string at compile time!
     red_frame_len equ $ - red_frame_msg
 
 
@@ -162,14 +169,18 @@ section .data
 
 
     ; Cursor Control (Move up exactly 35 lines)
+    ; 'db' means Define Byte. We define raw bytes of data.
+    ; 0x1B is the hexadecimal ASCII code for "ESCAPE", which tells the terminal to expect an ANSI command.
     move_up db 0x1B, '[35A', 0x0D
     move_up_len equ $ - move_up
 
     ; Sound Control
+    ; 0x07 is the hexadecimal ASCII code for the "Bell" character, which triggers the system's hardware beep!
     beep_msg db 0x07
     beep_len equ $ - beep_msg
 
     ; Alerts and Prompts
+    ; 0xA is the hexadecimal ASCII code for Line Feed (Newline), which pushes output to the next line.
     ped_alert db 0xA, 0x1B, '[1;36m', '>>> PEDESTRIAN BUTTON PRESSED! <<<', 0x1B, '[0m', 0xA
     ped_alert_len equ $ - ped_alert
 
@@ -185,6 +196,13 @@ section .data
         tv_nsec dq 0
 
 section .bss
+    ; =============================================================
+    ; [BSS SEGMENT]
+    ; The .bss section is a static memory section for uninitialized variables.
+    ; It reserves space in memory that will be used later.
+    ; =============================================================
+    
+    ; 'resb' stands for Reserve Byte. We are reserving 2 bytes of memory to hold the user's keystroke.
     input resb 2
 
 section .text
