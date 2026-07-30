@@ -56,6 +56,31 @@ To push the boundaries of standard Assembly projects, this program includes adva
 
 ---
 
+## 📚 Course Concepts Applied (Presentation Notes)
+
+This project heavily utilizes the core concepts taught in class:
+
+### 1. Memory Segments
+- **`.data`**: Used to store our initialized constants (the massive ASCII art frames like `red_frame_msg`) and prompt strings.
+- **`.bss`**: Used to reserve uninitialized memory buffers (`input resb 2`) to capture user keystrokes dynamically at runtime.
+- **`.text`**: Stores our executable instructions and subroutines.
+
+### 2. General Purpose Registers & Addressing Modes
+- **Accumulator (`rax`)**: Used extensively to hold the System Call ID (e.g., `1` for `sys_write`, `60` for `sys_exit`).
+- **Data Register (`rdx`)**: Used to hold the length of our string buffers before executing `sys_write`.
+- **Immediate Addressing**: e.g., `mov rax, 1` (moving the constant 1 directly into the register).
+- **Register Addressing**: e.g., `dec r12` (decrementing the value stored in the `r12` register directly).
+- **Direct Addressing**: e.g., `cmp byte [input], 'q'` (accessing the specific memory location of the `input` buffer).
+
+### 3. Control Flow & Flags
+- We implemented an interactive router using **Comparisons (`cmp`)** and **Conditional Jumps (`je`)**. When `cmp` compares the user input against 'q', it updates the **Zero Flag (ZF)**. The `je` (Jump if Equal) instruction then checks this flag to divert the control flow.
+- We also use **Unconditional Jumps (`jmp`)** to create infinite loops (like the Night Mode flashing cycle).
+
+### 4. 64-bit Architecture vs 32-bit
+- While many standard tutorials use 32-bit `int 0x80` interrupts, this masterpiece is fully optimized for **Modern 64-bit x86_64 Architecture**, utilizing `syscall` instructions and 64-bit registers (`rax`, `rdi`, `rsi`).
+
+---
+
 ## 🚀 How to Run the Project
 
 ### Prerequisites
