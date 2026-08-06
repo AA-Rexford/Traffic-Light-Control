@@ -4,9 +4,20 @@ section .data
     ; This section holds memory that is defined before the program runs.
     ; =========================================================================
 
-    ; --- TRAFFIC LIGHT GRAPHICS ---
-    ; We use 'db' (Define Byte) to store raw text and color codes in memory.
-    ; 0x1B triggers ANSI color formatting, and 0xA is a Newline to move down.
+    ; --- TRAFFIC LIGHT GRAPHICS & COLOR CODES ---
+    ; To color the traffic light, we use ANSI Escape Sequences. 
+    ; 0x1B is the hexadecimal ASCII code for "ESCAPE" (27). 
+    ; When the terminal sees ESCAPE followed by '[', it expects a color code!
+    ; 
+    ; Color Legend used in the drawings below:
+    ; '[1;37m'      = Bright White (used for the outer traffic light box)
+    ; '[1;30m'      = Dark Gray (used for the "OFF" bulbs to look like empty sockets)
+    ; '[1;31m'      = Bright Red (used for the active red light)
+    ; '[38;5;226m'  = 256-Color Vibrant Yellow (standard yellow is too brown, so we used 256-color mode!)
+    ; '[1;32m'      = Bright Green (used for the active green light)
+    ; '[0m'         = Reset (turns off coloring so the terminal goes back to normal)
+    ; 0xA           = Newline (moves the cursor to the next line)
+    
     red_frame_msg:
                   db 0x1B, '[1;37m', ' .===============================. ', 0xA
                   db 0x1B, '[1;37m', ' || .-------------------------. || ', 0xA
