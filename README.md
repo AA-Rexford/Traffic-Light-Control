@@ -6,9 +6,9 @@ This project is a 64-bit Linux Assembly program simulating a real-world **Traffi
 
 The program executes a traffic light cycle: **RED -> YELLOW -> GREEN**. 
 
-To make the presentation stunning, we designed **Massive ASCII Art Circles** using standard characters (`-`, `.`, `\`, `/`) to render huge, perfectly circular lights directly in the terminal! We also use 256-color ANSI codes to ensure the Yellow is incredibly bright and doesn't look brown. The yellow light also uses the Ghanaian style "GET READY!" prompt.
+To make the interface stunning, we designed **Massive ASCII Art Circles** using standard characters (`-`, `.`, `\`, `/`) to render huge, perfectly circular lights directly in the terminal! We also use 256-color ANSI codes to ensure the Yellow is incredibly bright and doesn't look brown. The yellow light also uses the Ghanaian style "GET READY!" prompt.
 
-After completing a cycle, it pauses and waits for the user to press **ENTER** before running another cycle, ensuring the presenter has 100% control over the pace.
+After completing a cycle, it pauses and waits for the user to press **ENTER** before running another cycle, ensuring the user has 100% control over the pace.
 
 ## 🛠️ Concepts & Technologies Used
 
@@ -43,8 +43,8 @@ The program uses 64-bit general-purpose registers to pass arguments into system 
 
 To push the boundaries of standard Assembly projects, this program includes advanced real-world features:
 
-1. **Realistic 3D Double-Frame Housing & Pole**
-   The UI now draws an entire real-world traffic light box, including a double-layered, rounded housing frame and a physical stand at the bottom! All 3 lights are constantly visible inside this 3D frame, stacked vertically. The active light is painted in bright, vibrant colors, while the inactive lights are rendered as empty, dark-gray outlines to perfectly simulate a physical traffic light with its bulbs turned off.
+1. **Realistic Double-Frame Housing & Pole**
+   The UI now draws an entire real-world traffic light box, including a double-layered, rounded housing frame and a physical stand at the bottom! All 3 lights are constantly visible inside this frame, stacked vertically. The active light is painted in bright, vibrant colors, while the inactive lights are rendered as empty, dark-gray outlines to perfectly simulate a physical traffic light with its bulbs turned off.
 2. **In-Place Hologram Animation (ANSI Cursor Control)**
    Instead of endlessly scrolling down the terminal, the traffic light tower **stays locked in a single spot**. When a light changes, the Assembly code sends a raw ANSI escape sequence (`\033[35A`) to the Linux kernel to move the terminal cursor UP 35 lines. It then perfectly overwrites the previous tower in-place.
 3. **Accessibility Beep (Visually Impaired Mode)**
@@ -56,7 +56,7 @@ To push the boundaries of standard Assembly projects, this program includes adva
 
 ---
 
-## 📚 Course Concepts Applied (Presentation Notes)
+## 📚 Course Concepts Applied
 
 This project heavily utilizes the core concepts taught in class:
 

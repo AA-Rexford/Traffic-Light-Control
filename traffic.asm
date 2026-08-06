@@ -1,10 +1,5 @@
 section .data
-    ; =============================================================
-    ; [DATA SEGMENT]
-    ; The .data section is used for declaring initialized data or constants.
-    ; This data does not change at runtime. (e.g. DB for bytes, EQU for constants)
-    ; =============================================================
-    ; --- 3D Decorative Traffic Light Tower ---
+    ; traffic light graphics
     red_frame_msg:
                   db 0x1B, '[1;37m', ' .===============================. ', 0xA
                   db 0x1B, '[1;37m', ' || .-------------------------. || ', 0xA
@@ -42,10 +37,7 @@ section .data
                   db 0x1B, '[1;37m', '           _||_______||_           ', 0xA
                   db 0x1B, '[1;37m', '          [_____________]          ', 0xA
                   db 0x1B, '[0m'
-    ; 'equ' defines an Assembly Constant (like a #define in C)
-    ; '$' refers to the current memory address. By subtracting the start address, we calculate the exact length of the string at compile time!
-    red_frame_len equ $ - red_frame_msg
-
+    red_frame_len equ $ - red_frame_msg ; calculate string length
 
     yellow_frame_msg:
                   db 0x1B, '[1;37m', ' .===============================. ', 0xA
@@ -84,8 +76,7 @@ section .data
                   db 0x1B, '[1;37m', '           _||_______||_           ', 0xA
                   db 0x1B, '[1;37m', '          [_____________]          ', 0xA
                   db 0x1B, '[0m'
-    yellow_frame_len equ $ - yellow_frame_msg
-
+    yellow_frame_len equ $ - yellow_frame_msg ; calculate string length
 
     green_frame_msg:
                   db 0x1B, '[1;37m', ' .===============================. ', 0xA
@@ -124,8 +115,7 @@ section .data
                   db 0x1B, '[1;37m', '           _||_______||_           ', 0xA
                   db 0x1B, '[1;37m', '          [_____________]          ', 0xA
                   db 0x1B, '[0m'
-    green_frame_len equ $ - green_frame_msg
-
+    green_frame_len equ $ - green_frame_msg ; calculate string length
 
     all_off_frame_msg:
                   db 0x1B, '[1;37m', ' .===============================. ', 0xA
@@ -164,286 +154,244 @@ section .data
                   db 0x1B, '[1;37m', '           _||_______||_           ', 0xA
                   db 0x1B, '[1;37m', '          [_____________]          ', 0xA
                   db 0x1B, '[0m'
-    all_off_frame_len equ $ - all_off_frame_msg
+    all_off_frame_len equ $ - all_off_frame_msg ; calculate string length
 
+    ; move cursor up string
+    move_up db 0x1B, '[35A', 0x0D ; escape sequence to move cursor up 35 lines
+    move_up_len equ $ - move_up ; calculate string length
 
+    ; beep sound string
+    beep_msg db 0x07 ; 0x07 is the bell character
+    beep_len equ $ - beep_msg ; calculate string length
 
-    ; Cursor Control (Move up exactly 35 lines)
-    ; 'db' means Define Byte. We define raw bytes of data.
-    ; 0x1B is the hexadecimal ASCII code for "ESCAPE", which tells the terminal to expect an ANSI command.
-    move_up db 0x1B, '[35A', 0x0D
-    move_up_len equ $ - move_up
+    ; messages
+    ped_alert db 0xA, 0x1B, '[1;36m', '>>> PEDESTRIAN BUTTON PRESSED! <<<', 0x1B, '[0m', 0xA ; alert text
+    ped_alert_len equ $ - ped_alert ; calculate string length
 
-    ; Sound Control
-    ; 0x07 is the hexadecimal ASCII code for the "Bell" character, which triggers the system's hardware beep!
-    beep_msg db 0x07
-    beep_len equ $ - beep_msg
+    prompt_msg db 0xA, 'Press ENTER (Cycle), n (Night Mode), p (Pedestrian), q (Quit): ' ; menu text
+    prompt_len equ $ - prompt_msg ; calculate string length
 
-    ; Alerts and Prompts
-    ; 0xA is the hexadecimal ASCII code for Line Feed (Newline), which pushes output to the next line.
-    ped_alert db 0xA, 0x1B, '[1;36m', '>>> PEDESTRIAN BUTTON PRESSED! <<<', 0x1B, '[0m', 0xA
-    ped_alert_len equ $ - ped_alert
+    newline db 0xA ; newline character
+    nl_len equ $ - newline ; calculate string length
 
-    prompt_msg db 0xA, 'Press ENTER (Cycle), n (Night Mode), p (Pedestrian), q (Quit): '
-    prompt_len equ $ - prompt_msg
-
-    newline db 0xA
-    nl_len equ $ - newline
-
-    ; Timer Struct
+    ; timer values for sleep
     timeval:
-        tv_sec  dq 0
-        tv_nsec dq 0
+        tv_sec  dq 0 ; seconds
+        tv_nsec dq 0 ; nanoseconds
 
 section .bss
-    ; =============================================================
-    ; [BSS SEGMENT]
-    ; The .bss section is a static memory section for uninitialized variables.
-    ; It reserves space in memory that will be used later.
-    ; =============================================================
-    
-    ; 'resb' stands for Reserve Byte. We are reserving 2 bytes of memory to hold the user's keystroke.
-    input resb 2
+    input resb 2 ; reserve 2 bytes for the user input
 
 section .text
-    global _start
+    global _start ; entry point for the linker
 
 _start:
-    ; Program entry point. We jump straight into the traffic light cycle.
+    ; start the program
 
 cycle_start:
-    ; -------------------------------------------------------------
-    ; [STATE MACHINE: NORMAL CYCLE]
-    ; Cycles through Red, Yellow, Green automatically.
-    ; -------------------------------------------------------------
+    ; normal traffic cycle
     
-    ; System Call: sys_write (ID 1)
-    ; Purpose: Prints a blank newline to the terminal to give the UI padding.
-    mov rax, 1          ; System call number for sys_write
-    mov rdi, 1          ; File descriptor 1 = Standard Output (terminal)
-    mov rsi, newline    ; Pointer to the string to print
-    mov rdx, nl_len     ; Length of the string
-    syscall             ; Ask the Linux Kernel to execute the system call
+    ; print a blank line
+    mov rax, 1          ; sys_write
+    mov rdi, 1          ; standard output
+    mov rsi, newline    ; load newline character
+    mov rdx, nl_len     ; length
+    syscall             ; execute
 
-    ; --- STATE 1: RED ---
-    ; Print the Red Traffic Light Frame
-    mov rax, 1
-    mov rdi, 1
-    mov rsi, red_frame_msg
-    mov rdx, red_frame_len
-    syscall
+    ; show red light
+    mov rax, 1          ; sys_write
+    mov rdi, 1          ; standard output
+    mov rsi, red_frame_msg ; load red light frame
+    mov rdx, red_frame_len ; length
+    syscall             ; execute
 
-    ; Setup our timespec struct to sleep for 2.2 seconds (2 sec, 200,000,000 nanosec)
-    mov qword [tv_sec], 2
-    mov qword [tv_nsec], 200000000
-    call do_delay       ; Jump to our delay subroutine
-    
-    ; After waking up, move the terminal cursor back up 35 lines to overwrite in-place!
-    call do_move_up
+    ; sleep 2.2 seconds
+    mov qword [tv_sec], 2 ; set seconds to 2
+    mov qword [tv_nsec], 200000000 ; set nanoseconds to 200,000,000
+    call do_delay       ; call sleep function
+    call do_move_up     ; move cursor up
 
-    ; --- STATE 2: YELLOW ---
-    mov rax, 1
-    mov rdi, 1
-    mov rsi, yellow_frame_msg
-    mov rdx, yellow_frame_len
-    syscall
+    ; show yellow light
+    mov rax, 1          ; sys_write
+    mov rdi, 1          ; standard output
+    mov rsi, yellow_frame_msg ; load yellow light frame
+    mov rdx, yellow_frame_len ; length
+    syscall             ; execute
 
-    mov qword [tv_sec], 2
-    mov qword [tv_nsec], 200000000
-    call do_delay
-    call do_move_up
+    ; sleep 2.2 seconds
+    mov qword [tv_sec], 2 ; set seconds to 2
+    mov qword [tv_nsec], 200000000 ; set nanoseconds to 200,000,000
+    call do_delay       ; call sleep function
+    call do_move_up     ; move cursor up
 
-    ; --- STATE 3: GREEN ---
-    mov rax, 1
-    mov rdi, 1
-    mov rsi, green_frame_msg
-    mov rdx, green_frame_len
-    syscall
+    ; show green light
+    mov rax, 1          ; sys_write
+    mov rdi, 1          ; standard output
+    mov rsi, green_frame_msg ; load green light frame
+    mov rdx, green_frame_len ; length
+    syscall             ; execute
 
-    ; Green stays on slightly longer (3.0 seconds)
-    mov qword [tv_sec], 3
-    mov qword [tv_nsec], 0
-    call do_delay
+    ; sleep 3 seconds
+    mov qword [tv_sec], 3 ; set seconds to 3
+    mov qword [tv_nsec], 0 ; set nanoseconds to 0
+    call do_delay       ; call sleep function
 
 prompt_loop:
-    ; -------------------------------------------------------------
-    ; [INTERACTIVE ROUTER]
-    ; Pauses and waits for the user to select the next state.
-    ; -------------------------------------------------------------
-    
-    ; Print the interactive prompt asking for input
-    mov rax, 1
-    mov rdi, 1
-    mov rsi, prompt_msg
-    mov rdx, prompt_len
-    syscall
+    ; prompt the user for input
+    mov rax, 1          ; sys_write
+    mov rdi, 1          ; standard output
+    mov rsi, prompt_msg ; load prompt message
+    mov rdx, prompt_len ; length
+    syscall             ; execute
 
-    ; System Call: sys_read (ID 0)
-    ; Purpose: Pauses execution and waits for the user to type on the keyboard.
-    mov rax, 0          ; System call number for sys_read
-    mov rdi, 0          ; File descriptor 0 = Standard Input (keyboard)
-    mov rsi, input      ; Pointer to our buffer to store the keystroke
-    mov rdx, 2          ; Read 2 bytes (the character + the ENTER key newline)
-    syscall
+    ; read user input
+    mov rax, 0          ; sys_read
+    mov rdi, 0          ; standard input
+    mov rsi, input      ; load input buffer
+    mov rdx, 2          ; read 2 bytes
+    syscall             ; execute
 
-    ; Compare the first byte of the user's input against specific ASCII characters
-    cmp byte [input], 'q'
-    je exit             ; If 'q', Jump if Equal to the 'exit' routine
+    ; check input
+    cmp byte [input], 'q' ; check if 'q'
+    je exit             ; if 'q', go to exit
     
-    cmp byte [input], 'n'
-    je night_mode       ; If 'n', Jump to Night Mode
+    cmp byte [input], 'n' ; check if 'n'
+    je night_mode       ; if 'n', go to night mode
     
-    cmp byte [input], 'p'
-    je ped_mode         ; If 'p', Jump to Pedestrian Mode
+    cmp byte [input], 'p' ; check if 'p'
+    je ped_mode         ; if 'p', go to pedestrian mode
     
-    ; If they just pressed ENTER (or any other key), loop back to start the normal cycle
-    jmp cycle_start
+    jmp cycle_start     ; otherwise loop the normal cycle
 
 ped_mode:
-    ; -------------------------------------------------------------
-    ; [STATE MACHINE: PEDESTRIAN CROSSING]
-    ; Safely stops cars (Green -> Yellow -> Red) then activates beep.
-    ; -------------------------------------------------------------
+    ; pedestrian crossing logic
+    mov rax, 1          ; sys_write
+    mov rdi, 1          ; standard output
+    mov rsi, ped_alert  ; load alert text
+    mov rdx, ped_alert_len ; length
+    syscall             ; execute
+
+    ; show green light
+    mov rax, 1          ; sys_write
+    mov rdi, 1          ; standard output
+    mov rsi, green_frame_msg ; load green light frame
+    mov rdx, green_frame_len ; length
+    syscall             ; execute
     
-    ; Print the Pedestrian Alert Banner
-    mov rax, 1
-    mov rdi, 1
-    mov rsi, ped_alert
-    mov rdx, ped_alert_len
-    syscall
+    ; sleep 2 seconds
+    mov qword [tv_sec], 2 ; set seconds to 2
+    mov qword [tv_nsec], 0 ; set nanoseconds to 0
+    call do_delay       ; call sleep function
+    call do_move_up     ; move cursor up
 
-    ; Step 1: Force Green Light (cars still moving)
-    mov rax, 1
-    mov rdi, 1
-    mov rsi, green_frame_msg
-    mov rdx, green_frame_len
-    syscall
-    
-    mov qword [tv_sec], 2
-    mov qword [tv_nsec], 0
-    call do_delay
-    call do_move_up
+    ; show yellow light
+    mov rax, 1          ; sys_write
+    mov rdi, 1          ; standard output
+    mov rsi, yellow_frame_msg ; load yellow light frame
+    mov rdx, yellow_frame_len ; length
+    syscall             ; execute
 
-    ; Step 2: Transition to Yellow (cars slowing down)
-    mov rax, 1
-    mov rdi, 1
-    mov rsi, yellow_frame_msg
-    mov rdx, yellow_frame_len
-    syscall
+    ; sleep 1.5 seconds
+    mov qword [tv_sec], 1 ; set seconds to 1
+    mov qword [tv_nsec], 500000000 ; set nanoseconds to 500,000,000
+    call do_delay       ; call sleep function
+    call do_move_up     ; move cursor up
 
-    mov qword [tv_sec], 1
-    mov qword [tv_nsec], 500000000
-    call do_delay
-    call do_move_up
+    ; show red light
+    mov rax, 1          ; sys_write
+    mov rdi, 1          ; standard output
+    mov rsi, red_frame_msg ; load red light frame
+    mov rdx, red_frame_len ; length
+    syscall             ; execute
 
-    ; Step 3: Transition to Red (cars stopped, safe to cross!)
-    mov rax, 1
-    mov rdi, 1
-    mov rsi, red_frame_msg
-    mov rdx, red_frame_len
-    syscall
-
-    ; Start the accessibility beeping loop
-    mov r12, 4          ; Set loop counter (r12) to beep 4 times
+    ; beep 4 times
+    mov r12, 4          ; loop counter
 .ped_beep_loop:
-    ; Print the ASCII Bell character (0x07) which triggers a hardware beep
-    mov rax, 1
-    mov rdi, 1
-    mov rsi, beep_msg
-    mov rdx, beep_len
-    syscall
+    mov rax, 1          ; sys_write
+    mov rdi, 1          ; standard output
+    mov rsi, beep_msg   ; load beep sound
+    mov rdx, beep_len   ; length
+    syscall             ; execute
 
-    ; Wait 1 second between beeps
-    mov qword [tv_sec], 1
-    mov qword [tv_nsec], 0
-    call do_delay
+    ; wait 1 second
+    mov qword [tv_sec], 1 ; set seconds to 1
+    mov qword [tv_nsec], 0 ; set nanoseconds to 0
+    call do_delay       ; call sleep function
     
-    dec r12             ; Decrement the loop counter
-    jnz .ped_beep_loop  ; Jump Not Zero: If counter != 0, loop back and beep again!
+    dec r12             ; decrease loop counter
+    jnz .ped_beep_loop  ; repeat until zero
 
-    jmp prompt_loop     ; Return to the main menu when finished
+    jmp prompt_loop     ; return to prompt
 
 night_mode:
-    ; -------------------------------------------------------------
-    ; [STATE MACHINE: NIGHT MODE]
-    ; Flashes Yellow continuously for late-night low-traffic scenarios.
-    ; -------------------------------------------------------------
-    
-    mov rax, 1
-    mov rdi, 1
-    mov rsi, newline
-    mov rdx, nl_len
-    syscall
+    ; night mode flashing yellow logic
+    mov rax, 1          ; sys_write
+    mov rdi, 1          ; standard output
+    mov rsi, newline    ; load newline
+    mov rdx, nl_len     ; length
+    syscall             ; execute
 
-    mov r12, 5          ; Set loop counter to flash 5 times
+    mov r12, 5          ; loop counter for 5 flashes
 .night_loop:
-    ; Show the Yellow light
-    mov rax, 1
-    mov rdi, 1
-    mov rsi, yellow_frame_msg
-    mov rdx, yellow_frame_len
-    syscall
+    ; show yellow light
+    mov rax, 1          ; sys_write
+    mov rdi, 1          ; standard output
+    mov rsi, yellow_frame_msg ; load yellow light frame
+    mov rdx, yellow_frame_len ; length
+    syscall             ; execute
 
-    ; Fast delay (0.5 seconds)
-    mov qword [tv_sec], 0
-    mov qword [tv_nsec], 500000000
-    call do_delay
-    call do_move_up
+    ; sleep 0.5 seconds
+    mov qword [tv_sec], 0 ; set seconds to 0
+    mov qword [tv_nsec], 500000000 ; set nanoseconds to 500,000,000
+    call do_delay       ; call sleep function
+    call do_move_up     ; move cursor up
 
-    ; Turn all lights OFF (Blank frame)
-    mov rax, 1
-    mov rdi, 1
-    mov rsi, all_off_frame_msg
-    mov rdx, all_off_frame_len
-    syscall
+    ; show all off frame
+    mov rax, 1          ; sys_write
+    mov rdi, 1          ; standard output
+    mov rsi, all_off_frame_msg ; load all off frame
+    mov rdx, all_off_frame_len ; length
+    syscall             ; execute
 
-    mov qword [tv_sec], 0
-    mov qword [tv_nsec], 500000000
-    call do_delay
+    ; sleep 0.5 seconds
+    mov qword [tv_sec], 0 ; set seconds to 0
+    mov qword [tv_nsec], 500000000 ; set nanoseconds to 500,000,000
+    call do_delay       ; call sleep function
 
-    dec r12
-    jz .night_end       ; If counter hits 0, Jump if Zero to the end
+    dec r12             ; decrease loop counter
+    jz .night_end       ; finish if zero
 
-    ; Otherwise, move cursor up and loop again
-    call do_move_up
-    jmp .night_loop
+    call do_move_up     ; move cursor up
+    jmp .night_loop     ; loop again
 
 .night_end:
-    jmp prompt_loop
-
-; =================================================================
-; SUBROUTINES
-; Modular code blocks that can be called repeatedly to save space.
-; =================================================================
+    jmp prompt_loop     ; return to prompt
 
 do_move_up:
-    ; Prints our ANSI escape code `\033[35A` to move cursor up 35 lines
-    mov rax, 1
-    mov rdi, 1
-    mov rsi, move_up
-    mov rdx, move_up_len
-    syscall
-    ret                 ; Return to wherever `call do_move_up` was executed
+    ; suboutine to move cursor up
+    mov rax, 1          ; sys_write
+    mov rdi, 1          ; standard output
+    mov rsi, move_up    ; load escape sequence
+    mov rdx, move_up_len ; length
+    syscall             ; execute
+    ret                 ; return
 
 do_delay:
-    ; System Call: sys_nanosleep (ID 35)
-    ; Purpose: Suspends execution for the time specified in the `timeval` struct.
-    mov rax, 35         ; System call number for sys_nanosleep
-    mov rdi, timeval    ; Pointer to our timespec struct (seconds, nanoseconds)
-    xor rsi, rsi        ; Zero out rsi (we don't care about remaining time if interrupted)
-    syscall
-    ret
+    ; subroutine to pause execution
+    mov rax, 35         ; sys_nanosleep
+    mov rdi, timeval    ; load timer data
+    xor rsi, rsi        ; set to 0
+    syscall             ; execute
+    ret                 ; return
 
 exit:
-    ; Print a final newline for a clean terminal exit
-    mov rax, 1
-    mov rdi, 1
-    mov rsi, newline
-    mov rdx, nl_len
-    syscall
+    ; subroutine to exit program
+    mov rax, 1          ; sys_write
+    mov rdi, 1          ; standard output
+    mov rsi, newline    ; load newline
+    mov rdx, nl_len     ; length
+    syscall             ; execute
     
-    ; System Call: sys_exit (ID 60)
-    ; Purpose: Safely terminate the program and return control to Linux.
-    mov rax, 60         ; System call number for sys_exit
-    mov rdi, 0          ; Exit code 0 (Success)
-    syscall
+    mov rax, 60         ; sys_exit
+    mov rdi, 0          ; exit code 0
+    syscall             ; execute
